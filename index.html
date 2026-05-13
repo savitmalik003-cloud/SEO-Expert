@@ -25,6 +25,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>(function(){ emailjs.init({ publicKey: "Mr-q74SyDJuPTI9aI" }); })();</script>
 
   <script type="application/ld+json">
   {
@@ -38,7 +41,7 @@
         "description": "Savit Chaudhary is a Digital Marketing Expert and SEO Specialist based in Delhi NCR with 5+ years of experience and an MBA in Digital Marketing. He helps brands rank on Google through SEO, Google Ads, Social Media, and Content Marketing.",
         "url": "https://digitalsavit.weebly.com/",
         "telephone": "+918700918961",
-        "email": "savitmalik003@gmail.com",
+        "email": "marketingbysavitchaudhary@gmail.com",
         "sameAs": [
           "https://about.me/MarketingBySavitChaudhary",
           "https://www.instagram.com/marketingbysavitchaudhary",
@@ -865,6 +868,17 @@
 ═══════════════════════════════════════════ -->
 <script>
   /* ── FORM → WHATSAPP + POPUP ── */
+  /* ═══════════════════════════════════════════════
+     ✏️  EMAILJS CONFIG — Yahan apni 3 IDs daalo
+         Step 1: emailjs.com pe free account banao
+         Step 2: Gmail service connect karo
+         Step 3: Email template banao (variables: from_name, phone, from_email, website, service, goals)
+         Step 4: Neeche ki 3 values replace karo
+  ════════════════════════════════════════════════ */
+  var EJS_SERVICE_ID  = 'service_w953jm6';   // e.g. 'service_abc123'
+  var EJS_TEMPLATE_ID = 'template_5yi2qfr';  // e.g. 'template_xyz789'
+  /* Public Key upar <head> mein daali hai */
+
   function submitContactForm() {
     var name    = (document.getElementById('fc_name')    ? document.getElementById('fc_name').value    : '').trim();
     var phone   = (document.getElementById('fc_phone')   ? document.getElementById('fc_phone').value   : '').trim();
@@ -873,47 +887,83 @@
     var service = (document.getElementById('fc_service') ? document.getElementById('fc_service').value : '').trim();
     var goals   = (document.getElementById('fc_goals')   ? document.getElementById('fc_goals').value   : '').trim();
 
-    if (!name)  { alert('Kripaya apna naam daalna zaroori hai.'); document.getElementById('fc_name').focus(); return; }
-    if (!phone) { alert('WhatsApp number daalna zaroori hai.'); document.getElementById('fc_phone').focus(); return; }
+    /* Validation */
+    if (!name)  { showFieldError('fc_name',  'Apna naam daalna zaroori hai'); return; }
+    if (!phone) { showFieldError('fc_phone', 'WhatsApp number zaroori hai');  return; }
 
-    // Build plain-text WhatsApp message (NO emojis to avoid encoding issues)
-    var lines = [
-      '*New Lead from Website!*',
-      '',
-      '*Name:* ' + name,
-      '*Phone/WA:* ' + phone
-    ];
-    if (email)   lines.push('*Email:* ' + email);
-    if (website) lines.push('*Website:* ' + website);
-    if (service) lines.push('*Service:* ' + service);
-    if (goals)   lines.push('*Goals:* ' + goals);
-    lines.push('', '_(Sent from marketingbysavitchaudhary.com)_');
-
-    var msg   = lines.join('\n');
-    var waURL = 'https://wa.me/918700918961?text=' + encodeURIComponent(msg);
-
+    /* Button → loading state */
     var btn = document.querySelector('.form-submit');
-    if (btn) { btn.classList.add('loading'); btn.textContent = 'Submitting...'; }
+    if (btn) { btn.classList.add('loading'); btn.textContent = 'Sending...'; }
 
-    setTimeout(function() {
-      // ✅ NO window.open — no new tab! Only update popup WA button link.
-      if (btn) { btn.classList.remove('loading'); btn.textContent = 'Send Message & Get Free Audit \u2192'; }
+    /* EmailJS template parameters — template mein inhi variable names use karo */
+    var templateParams = {
+      from_name  : name,
+      phone      : phone,
+      from_email : email   || 'Not provided',
+      website    : website || 'Not provided',
+      service    : service || 'Not selected',
+      goals      : goals   || 'Not provided',
+      reply_to   : email   || 'noreply@noreply.com',
+      to_email   : 'savitmalik003@gmail.com'
+    };
 
-      // Set the WhatsApp link inside the popup button
-      var waLink = document.getElementById('thankYouWaLink');
-      if (waLink) waLink.href = waURL;
+    /* WhatsApp fallback link (popup button ke liye — tab nahi khulega automatically) */
+    var waMsg = '*New Lead from Website!*\n\n*Name:* ' + name + '\n*Phone:* ' + phone
+      + (email   ? '\n*Email:* '   + email   : '')
+      + (website ? '\n*Website:* ' + website : '')
+      + (service ? '\n*Service:* ' + service : '')
+      + (goals   ? '\n*Goals:* '   + goals   : '')
+      + '\n\n_(marketingbysavitchaudhary.com)_';
+    var waURL = 'https://wa.me/918700918961?text=' + encodeURIComponent(waMsg);
 
-      // Show Thank You popup
-      var overlay = document.getElementById('thankYouOverlay');
-      if (overlay) { overlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
-
-      // Clear form
-      ['fc_name','fc_phone','fc_email','fc_website','fc_goals'].forEach(function(id) {
-        var el = document.getElementById(id); if (el) el.value = '';
+    /* Send email via EmailJS — koi tab nahi khulta */
+    emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, templateParams)
+      .then(function() {
+        /* SUCCESS */
+        onFormSuccess(btn, waURL);
+      }, function(error) {
+        /* FAIL — phir bhi popup dikhao + WA button se backup */
+        console.warn('EmailJS error:', error);
+        onFormSuccess(btn, waURL);  /* user experience break na ho */
       });
-      var sel = document.getElementById('fc_service');
-      if (sel) sel.selectedIndex = 0;
-    }, 600);
+  }
+
+  function onFormSuccess(btn, waURL) {
+    if (btn) { btn.classList.remove('loading'); btn.textContent = 'Send Message & Get Free Audit \u2192'; }
+
+    var waLink = document.getElementById('thankYouWaLink');
+    if (waLink) waLink.href = waURL;
+
+    var overlay = document.getElementById('thankYouOverlay');
+    if (overlay) { overlay.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+
+    /* Form clear */
+    ['fc_name','fc_phone','fc_email','fc_website','fc_goals'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+    var sel = document.getElementById('fc_service');
+    if (sel) sel.selectedIndex = 0;
+  }
+
+  function showFieldError(fieldId, msg) {
+    var el = document.getElementById(fieldId);
+    if (!el) return;
+    el.style.borderColor = '#ff4d4d';
+    el.style.boxShadow = '0 0 0 3px rgba(255,77,77,0.15)';
+    el.focus();
+    setTimeout(function() {
+      el.style.borderColor = '';
+      el.style.boxShadow = '';
+    }, 3000);
+    /* Small inline error message */
+    var existing = document.getElementById('err_' + fieldId);
+    if (existing) existing.remove();
+    var err = document.createElement('div');
+    err.id = 'err_' + fieldId;
+    err.style.cssText = 'color:#ff6b6b;font-size:0.78rem;margin-top:5px;';
+    err.textContent = msg;
+    el.parentNode.appendChild(err);
+    setTimeout(function() { if (err.parentNode) err.remove(); }, 4000);
   }
 
   function closeThankYou() {
