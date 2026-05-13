@@ -71,7 +71,7 @@
         "description": "Digital Marketing and SEO services in Delhi NCR — SEO, Google Ads, Social Media Marketing, Content Marketing, Local SEO.",
         "url": "https://digitalsavit.weebly.com/",
         "telephone": "+918700918961",
-        "email": "marketingbysavitchaudhary@gmail.com",
+        "email": "savitmalik003@gmail.com",
         "founder": { "@id": "https://digitalsavit.weebly.com/#person" },
         "areaServed": [
           { "@type": "City", "name": "Delhi" },
@@ -490,7 +490,7 @@
       <p>Ready to rank higher on Google, drive more traffic and turn visitors into customers? Start with a free SEO audit — no commitment required.</p>
       <div class="contact-items">
         <div class="contact-item"><div class="contact-icon">📞</div><div class="contact-item-text"><strong>Phone / WhatsApp</strong><a href="tel:8700918961">8700918961</a></div></div>
-        <div class="contact-item"><div class="contact-icon">✉️</div><div class="contact-item-text"><strong>Email</strong><a href="mailto:marketingbysavitchaudhary@gmail.com">marketingbysavitchaudhary@gmail.com</a></div></div>
+        <div class="contact-item"><div class="contact-icon">✉️</div><div class="contact-item-text"><strong>Email</strong><a href="mailto:savitmalik003@gmail.com">savitmalik003@gmail.com</a></div></div>
         <div class="contact-item"><div class="contact-icon">📍</div><div class="contact-item-text"><strong>Location</strong><span>Delhi NCR — serving clients across India</span></div></div>
         <div class="contact-item"><div class="contact-icon">📸</div><div class="contact-item-text"><strong>Instagram</strong><a href="https://www.instagram.com/marketingbysavitchaudhary" target="_blank">@marketingbysavitchaudhary</a></div></div>
       </div>
@@ -895,16 +895,16 @@
     var btn = document.querySelector('.form-submit');
     if (btn) { btn.classList.add('loading'); btn.textContent = 'Sending...'; }
 
-    /* EmailJS template parameters — template mein inhi variable names use karo */
+    /* EmailJS template parameters — template ke variables se exactly match */
     var templateParams = {
-      from_name  : name,
-      phone      : phone,
-      from_email : email   || 'Not provided',
-      website    : website || 'Not provided',
-      service    : service || 'Not selected',
-      goals      : goals   || 'Not provided',
-      reply_to   : email   || 'noreply@noreply.com',
-      to_email   : 'savitmalik003@gmail.com'
+      from_name  : name,                          /* Subject: {{from_name}} */
+      name       : name,                          /* From Name: {{name}} */
+      phone      : phone,                         /* {{phone}} */
+      from_email : email   || 'Not provided',     /* {{from_email}} */
+      email      : email   || 'noreply@noreply.com', /* Reply To: {{email}} */
+      website    : website || 'Not provided',     /* {{website}} */
+      service    : service || 'Not selected',     /* {{service}} */
+      goals      : goals   || 'Not provided'      /* {{goals}} */
     };
 
     /* WhatsApp fallback link (popup button ke liye — tab nahi khulega automatically) */
@@ -918,13 +918,14 @@
 
     /* Send email via EmailJS — koi tab nahi khulta */
     emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, templateParams)
-      .then(function() {
-        /* SUCCESS */
+      .then(function(response) {
+        console.log('EmailJS SUCCESS:', response.status, response.text);
         onFormSuccess(btn, waURL);
-      }, function(error) {
-        /* FAIL — phir bhi popup dikhao + WA button se backup */
-        console.warn('EmailJS error:', error);
-        onFormSuccess(btn, waURL);  /* user experience break na ho */
+      })
+      .catch(function(error) {
+        console.error('EmailJS FAILED — Status:', error.status, '| Text:', error.text, '| Full:', JSON.stringify(error));
+        /* Popup still dikhao taaki user ka experience break na ho */
+        onFormSuccess(btn, waURL);
       });
   }
 
@@ -1076,7 +1077,7 @@
       return '🔍 Great choice! The free SEO audit is completely no-strings-attached.<br/><br/>👉 Fill the contact form on this page OR<br/>📞 Call directly: <a href="tel:8700918961" style="color:#00d4ff">8700918961</a><br/>💬 WhatsApp: <a href="https://wa.me/918700918961" target="_blank" style="color:#25D366">Click here</a>';
 
     if (m.includes('whatsapp') || m.includes('call') || m.includes('contact') || m.includes('reach') || m.includes('phone'))
-      return '📞 <strong>Call/WhatsApp:</strong> <a href="tel:8700918961" style="color:#00d4ff">8700918961</a><br/>✉️ <strong>Email:</strong> marketingbysavitchaudhary@gmail.com<br/>📍 <strong>Location:</strong> Delhi NCR, India<br/><br/>💬 <a href="https://wa.me/918700918961?text=Hi Savit!" target="_blank" style="color:#25D366">Open WhatsApp Chat →</a>';
+      return '📞 <strong>Call/WhatsApp:</strong> <a href="tel:8700918961" style="color:#00d4ff">8700918961</a><br/>✉️ <strong>Email:</strong> savitmalik003@gmail.com<br/>📍 <strong>Location:</strong> Delhi NCR, India<br/><br/>💬 <a href="https://wa.me/918700918961?text=Hi Savit!" target="_blank" style="color:#25D366">Open WhatsApp Chat →</a>';
 
     if (m.includes('delhi') || m.includes('ncr') || m.includes('location') || m.includes('where'))
       return '📍 I\'m based in <strong>Delhi NCR</strong> and work with clients across all of India — remotely and in-person for Delhi NCR clients!';
